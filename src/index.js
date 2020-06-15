@@ -16,7 +16,7 @@ client.on("message", (message) => {
 
 // login to client
 
-client.login("NzIyMDk4NjIyNjI3MzE1NzIy.XueeRg.eSjxW53qydMt-5DYbC5K0deH57Q");
+client.login(process.env.DISCORD_SECRET_KEY);
 
 // functions
 const handleMessage = (message) => {
