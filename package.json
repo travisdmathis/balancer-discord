@@ -2,8 +2,9 @@
   "name": "balancer-discord",
   "version": "1.0.0",
   "description": "A Discord bot for interacting w/ balancer pools",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "start": "node --experimental-modules src/index.js | pino-pretty",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +19,20 @@
   },
   "homepage": "https://github.com/travisdmathis/balancer-discord#readme",
   "dependencies": {
-    "babel-preset-es2015": "^6.24.1"
+    "discord.js": "^12.2.0",
+    "dotenv": "^8.2.0",
+    "graphql-request": "^2.0.0",
+    "pino": "^6.3.2",
+    "pino-pretty": "^4.0.0"
+  },
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "prettier": "2.0.5",
+    "pretty-quick": "^2.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
