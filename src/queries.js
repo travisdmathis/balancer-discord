@@ -17,4 +17,17 @@ module.exports = {
       }
     `;
   },
+  getPoolShares: (userAddress) => {
+    return `
+    {
+      poolShares(where: {userAddress: "${userAddress}", balance_not: 0}) {
+        id
+        balance
+        poolId {
+          id
+        }
+      }
+    }
+    `;
+  },
 };

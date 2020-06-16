@@ -1,5 +1,9 @@
 // Bot config
-const { prefix } = require("./config.json");
+const { prefix, endpoint } = require("./config.json");
+const { getPool } = require("./queries.js");
+const { request } = require("graphql-request");
+const { logger } = require("ethers");
+const { _ } = require("lodash");
 
 module.exports = {
   pool: (pool) => {
@@ -13,10 +17,31 @@ ${module.exports.tokens(pool.tokens)}
 `;
   },
 
+  poolShares: async (poolShares) => {
+    let poolShareMessage = ``;
+
+    for (i = 0; i < poolShares.length; i++) {
+      const poolQuery = getPool(poolShares[i].poolId.id);
+      const poolData = await request(endpoint, poolQuery);
+
+      for (j = 0; j < poolData.pools.length; j++) {
+        const poolName = module.exports.poolName(poolData.pools[j].tokens);
+
+        poolShareMessage += `
+[${poolName}]
+
+Balance: ${poolShares[i].balance}
+        `;
+      }
+    }
+
+    return poolShareMessage;
+  },
+
   // splits messages into command, param, and arguments
   // @param message
   // @returns formattedMessage Object Contains args, command, param
-  splitMessage: (message) => {
+  message: (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) {
       return false;
     }
