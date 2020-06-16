@@ -2,19 +2,15 @@
 const { prefix } = require("./config.json");
 
 module.exports = {
-  pool: (pool, message) => {
-    if (pool) {
-      message.channel.send(`
+  pool: (pool) => {
+    return `
 [${module.exports.poolName(pool.tokens)}]
 
 Id: ${pool.id}
 Swap Fee: ${pool.swapFee}
 
 ${module.exports.tokens(pool.tokens)}
-      `);
-    } else {
-      message.channel.send(`There is no Pool with that ID, ${message.author}`);
-    }
+`;
   },
 
   // splits messages into command, param, and arguments

@@ -69,7 +69,17 @@ const handleMessage = async (message) => {
         const data = await request(endpoint, query);
         const pool = data.pools[0];
 
-        format.pool(pool, message);
+        // Format and Send to Discord
+        if (pool) {
+          const poolMessage = format.pool(pool);
+
+          message.channel.send(poolMessage);
+        } else {
+          message.channel.send(
+            `There is no Pool with that ID, ${message.author}`
+          );
+        }
+
         break;
       default:
         message.channel.send("Sorry I don't understand that command.");
