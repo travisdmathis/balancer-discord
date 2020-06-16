@@ -2,9 +2,12 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const logger = require("pino")();
 const { request } = require("graphql-request");
-const queries = require("./queries.js");
-const ethers = require("ethers");
 global.fetch = require("node-fetch");
+
+// imports
+const queries = require("./queries.js");
+const validations = require("./validations.js");
+const format = require("./format.js");
 
 // Bot config
 const { prefix } = require("./config.json");
@@ -31,7 +34,7 @@ client.login(process.env.DISCORD_SECRET_KEY);
 // functions
 
 const handleMessage = async (message) => {
-  const formattedMessage = splitMessage(message);
+  const formattedMessage = format.splitMessage(message);
 
   if (formattedMessage.command === "balancer") {
     switch (formattedMessage.param) {
@@ -53,10 +56,12 @@ const handleMessage = async (message) => {
           break;
         }
 
-        if (!isValidAddress(poolId)) {
+        if (!validations.address(poolId)) {
           message.channel.send(
             `You provided an invalid address, ${message.author}.`
           );
+
+          break;
         }
 
         // Queries and Data
@@ -64,15 +69,7 @@ const handleMessage = async (message) => {
         const data = await request(endpoint, query);
         const pool = data.pools[0];
 
-        message.channel.send(`
-[${formatPoolName(pool.tokens)}]
-
-Id: ${pool.id}
-Swap Fee: ${pool.swapFee}
-
-${formatTokens(pool.tokens)}
-        `);
-
+        format.pool(pool, message);
         break;
       default:
         message.channel.send("Sorry I don't understand that command.");
@@ -80,71 +77,4 @@ ${formatTokens(pool.tokens)}
         break;
     }
   }
-};
-
-// Checks for valid 0x address
-// @param address
-// @returns Boolean
-const isValidAddress = (address) => {
-  try {
-    ethers.utils.getAddress(address);
-  } catch (error) {
-    return false;
-  }
-
-  return true;
-};
-
-// splits messages into command, param, and arguments
-// @param message
-// @returns formattedMessage Object Contains args, command, param
-const splitMessage = (message) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) {
-    return false;
-  }
-
-  const args = message.content.slice(prefix.length).split(" ");
-  const command = args.shift().toLowerCase();
-  const param = args.shift().toLowerCase();
-  const formattedMessage = {
-    args: args,
-    command: command,
-    param: param,
-  };
-
-  return formattedMessage;
-};
-
-// Takes in a array of tokens and creates a Pool name based on token symbols
-// @param tokens Pool tokens array
-// @returns String formatted pool name
-const formatPoolName = (tokens) => {
-  let poolName = "";
-  let tokenCount = 0;
-
-  tokens.forEach((token) => {
-    tokenCount += 1;
-
-    poolName =
-      poolName + token.symbol + `${tokenCount != tokens.length ? "/" : ""}`;
-  });
-
-  return poolName;
-};
-
-const formatTokens = (tokens) => {
-  let formattedTokens = "";
-
-  tokens.forEach((token) => {
-    formattedTokens += `
-      [${token.symbol}]
-
-      Address: ${token.address}
-      Balance: ${token.balance}
-      Denormalized Weight: ${token.denormWeight}
-      Id: ${token.id}
-    `;
-  });
-
-  return formattedTokens;
 };
